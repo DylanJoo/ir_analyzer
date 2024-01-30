@@ -1,0 +1,13 @@
+*.log
+*.pot
+*.pyc
+local_settings.py
+prefix.sh
+publish.sh
+db/relevation.db
+!documents/put_the_jsonl_file_here
+documents/
+documents_all/
+raw_data/
+/* raw_query/ */
+.DS_Store

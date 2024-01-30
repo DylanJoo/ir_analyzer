@@ -1,0 +1,89 @@
+{% extends "judgementapp/base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+      {# title #}
+      <h5 class="card-title">Setup Queries and Retrieved Documents</h5>
+      <p class="card-text">The system will synchonize queries/results in the database and uploaded files. </p>
+      <b>Please be sure the query is set before uploading results, 
+          so that the result can be linked via QueryID.</b>(or the query will have 'NA' value).</br>
+      Once the query is fixed, you can upload different result files iteratively. 
+      The system will keep the previous data and refresh to a new one.</p>
+      {% if deleted %}
+          <div class="alert alert-danger" role="alert">
+              {{ amount }} unjudged documents are removed, please upload new results.
+          </div>
+      {% endif %}
+      {% if uploaded %}
+          {% if queries %}
+            <div class="alert alert-success" role="alert">
+              {{ queries }} queries processed succesfully.
+            </div>
+          {% endif %}
+          {% if judgements %}
+            <div class="alert alert-success" role="alert">
+              {{ judgements }} document results processed succesfully.
+            </div>
+          {% endif %}
+          {% if not queries and not judgements %}
+            <div class="alert alert-warning" role="alert">
+              The queries or results in uploaded files <b>already existed. 
+              No</b> any new queries or query-document result will be refreshed.
+            </div>
+          {% endif %}
+      {% endif %}
+    </div>
+
+    {# form #}
+    <div class="card-body">
+      <form class="form-horizontal" action="save" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <p>Query file with the following two formats 
+          <ul>
+              <li><p><b>tsv</b> file with the format -- <b>QueryId [\t] QueryText</b></p></li>
+              <li><p><b>jsonl</b> file with the format --  <b>1st line is metadata and the other lines are contents.</b></p></li>
+              <div class="box"><pre>
+                  {"form": "{form}", "filing_date": "{date}", "company_name": "{name}"} # first line 
+                  {"id": QueryId, "paragraph": List of QueryText} ...                   # other lines
+              </div></pre>
+          </ul>
+          <div class="control-group">
+              <div class="container form-label input-group">
+                  <label class="form-label" for="queryfile"></label>
+                  <input type="file" class="form-control" id="queryfile", name='queryFile'/>
+                  <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+              </div>
+          </div>
+          </br>
+          <p>Results file with the standard TREC format </p>
+          <ul>
+              <li><p><b>TREC run</b> file with the format -- <b>QueryId Q0 DocId Rank Score Description</b>.</p></li>
+          </ul>
+          <div class="control-group">
+              <div class="container form-label input-group">
+                  <label class="control-label" for="resultsfile"></label>
+                  <input type="file" class="form-control" id="resultsfile", name='resultsFile'/>
+                  <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+              </div>
+          </div>
+          </br>
+      </form>
+          <div class="control-group float-end">
+              <div class="container form-label input-group">
+                  <form class="form-horizontal" action="delete" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <button class="btn btn-outline-danger" type="submit" id="inputGroupFileAddon04">Delete unjudged</button>
+                  </form>
+                  <form class="form-horizontal" action="reset" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <button class="btn btn-outline-danger" type="submit" id="inputGroupFileAddon04">Reset</button>
+                  </form>
+              </div>
+          </div>
+    </div>
+
+</div>
+
+{% endblock %}

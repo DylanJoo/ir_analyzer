@@ -1,0 +1,215 @@
+{% extends "judgementapp/base.html" %}
+
+{% block content %}
+<style>
+    #summary h6.collapse:not(.show) {
+        height: 0px !important;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+    }
+    #summary h6.collapsing { min-height: 0px !important; }
+    #summary a.collapsed:after  { content: '(show target)'; }
+    #summary a:not(.collapsed):after { content: '(hide target)'; }
+</style>
+
+<div class="card">
+
+<div class="card-body">
+    <h5 class="card-title">Task 2 - Reference Retrieval</h5>
+    <p class="card-text">Here is the guideline.
+        This task has two subtasks: (task 1a) span highlighting, and (task 1b) content classification.
+        And below are some annotation instructions. 
+        <h6 class="card-title">General guildline</h6>
+        <ul>
+            <li>Annotators should <b>avoid speculation</b> based on prior knowledge and 
+                should not draw conclusions that require speculation or prior knowledge of the company.</li>
+            <li>Annotators should be as <b>consistent</b> as they can be with respect to their own annotations.</li> 
+        </ul>
+    </p>
+    <p class="card-text">
+        <h6 class="card-title">Detail guildlines</h6>
+        For this task, annotators should access the relevance of reference (i.e., the document in IR). 
+        Follow common IR setting, we adopt the graded labels from 0 to 2.<br/>
+        <ul>
+            <li>Not relevant: the passage is irrelevant to your judgment of highlights</li>
+            <li>Somewhat relevant: the passage is relevant to your judgment of highlights.</li>
+            <li>Highly relevant: the information in the passage can be crucial to your judgment of highlights.</li>
+        </ul>
+    </p>
+</div>
+
+<div class="card text-left m-2">
+    <div class="row card-body">
+        <h6>Target ID: <i>{{query.qId}}</i></h6>
+    </div>
+
+    <div class="card-body row">
+        <div style="height:100; position:relative; overflow-y: scroll;" id='content'>
+            <h6>{{ query.metadata }}</h6>
+            <h6>{{ query.text }}</h6>
+        </div>
+    </div>
+</div>
+
+<div class="card text-left m-2">
+    <div class="row card-body">
+        <h6>Highlights of the Target</h6>
+        <div class="col">
+            <h6>{{ query.comment }}</h6>
+        </div>
+        <div class="col-2" align="right">
+            {% if query.category.0 == 1%} 
+            <button type="button" class="btn btn-secondary btn-sm">Trivial</button>
+            {% endif %}
+            {% if query.category.1 == 1%}
+            <button type="button" class="btn btn-primary btn-sm">Company-specific</button>
+            {% endif %}
+            {% if query.category.2 == 1%}
+            <button type="button" class="btn btn-danger btn-sm">Change/Action</button>
+            {% endif %}
+            {% if query.category.3 == 1%}
+            <button type="button"class="btn btn-warning btn-sm">Reason</button>
+            {% endif %}
+            {% if query.category.4 == 1%}
+            <button type="button" "btn btn-success btn-sm">Redirect</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<div class="card text-left m-2">
+    <div class="card-body row">
+        <h6>Reference ID: <i>{{ document.docId }}</i> ({{ rank }} / {{total_rank}}) </h6>
+    </div>
+
+    <div class="card-body row">
+        <div class="col">
+            <h6>{{ document.text }} </h6>
+        </div>
+        <div style="height:100; position:relative; overflow-y: scroll;" id='content'>
+          {% for c in content %}
+          <h6>{{ c }}<br/></h6>
+          {% endfor %}
+        </div>
+        <div class="col" align="left">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Basic checkbox toggle button group">
+                <button class="btn btn-{% if document.get_topic == 1 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Business</button>
+                <button class="btn btn-{% if document.get_topic == 2 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Risk</button>
+                <button class="btn btn-{% if document.get_topic == 3 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Legal</button>
+                <button class="btn btn-{% if document.get_topic == 4 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Financial Status</button>
+                <button class="btn btn-{% if document.get_topic >= 5 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Strategic Plan</button>
+                <button class="btn btn-{% if document.get_topic >= 5 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Operational</button>
+                <button class="btn btn-{% if document.get_topic == 0 %}{% else %}outline-{% endif %}dark btm-sm" disabled>Others</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body row">
+        <div class="col">
+            {% if prev %}
+            <a href="{% url 'document' qId=query.qId docId=prev.document.docId %}" class="btn btn-outline-dark btn-sm">Prev Document</a>
+            {% endif %}
+        </div>
+        <div class="col" align="right">
+            {% if next %}
+            <a href="{% url 'document' qId=query.qId docId=next.document.docId %}" class="btn btn-outline-dark btn-sm">Next Document</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card text-left m-2">
+    <form class="form-inline" action="{% url 'judge' qId=query.qId docId=document.docId %}" method="post">
+    <div class="row card-body">
+        <div class="col-5">
+        <h6>The relevance of this document</h6>
+        <p>i.e, being a support of the important information in query (target).</p>
+            {% csrf_token %}
+
+            {% if query.category.0 != 1%} {# if it is not a highlight --> not relevant referneces#}
+            <div class="form-check" id="relevance-labels">
+                <input type="radio" name="relevance" id="relevance1" value="-1" {% if judgement.relevance == -1 %} checked {% endif %}>
+                <label class="radio"> Unjudged </label></br>
+                <input type="radio" name="relevance" id="relevance2" value="2" {% if judgement.relevance == 2 %} checked {% endif %}>
+                <label class="radio"> Highly relevant </label></br>
+                <input type="radio" name="relevance" id="relevance1" value="1" {% if judgement.relevance == 1 %} checked {% endif %}>
+                <label class="radio"> Somewhat relevant </label></br>
+                <input type="radio" name="relevance" id="relevance0" value="0" {% if judgement.relevance == 0 %} checked {% endif %}>
+                <label class="radio"> Not relevant </label></br>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-7">
+            <div class="control-group">
+                <script type="text/javascript">
+                  function getSelectedText() {
+                      if (window.getSelection) {
+                          return window.getSelection().toString();
+                      } else if (document.selection) {
+                          return document.selection.createRange().text;
+                      }
+                      return '';
+                  }
+
+                  function captureSelection() {
+                    textarea = document.getElementById('comment');
+                    {# if (textarea.value=='Comments') { #}
+                    if (textarea.value.length == 0) {
+                      textarea.value = getSelectedText();
+                    } else if (textarea.value.length > 0) {
+                      textarea.value = textarea.value + ' ||| ' + getSelectedText();
+                    }
+                  }
+
+                  // Keyboard shortcuts for faster judging.
+                  document.addEventListener("DOMContentLoaded", function() {
+                      let btn = {% if next %} document.getElementById("btn-next") {% else %} document.getElementById("btn-save") {% endif %}
+                      let els = document.querySelectorAll("#relevance-labels > label > input");
+                      document.onkeypress = function (e) {
+                          e = e || window.event;
+                          value = e.keyCode - 49
+                          if (value >= 0 && value < els.length) {
+                              els[value].checked = 1
+                              btn.click();
+                          }
+                      };
+                  });
+                </script>
+
+                <h6>The Rationale of relevant reference. </h6>
+                <p>how you select this document (reference) as relevant? Type or
+                <button type="button" class="btn btn-warning btn-sm" id="capture" onclick="captureSelection()">highlight</button>
+                 <div class="control-group">
+                    <div class="controls">
+                      <textarea style="width:100%" id="comment" name="comment">{% if judgement.comment %}{{ judgement.comment }}{% else %}{% endif %}</textarea>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body row">
+        <div class="col">
+            {% if next_query %}
+                <a href="{% url 'query' qId=next_query.qId%}" class="btn btn-outline-dark btn-sm">Next Query</a>
+            {% endif %}
+        </div>
+        <div class="col">
+            <div class="form-actions" align="right">
+                <button id="btn-save" type="submit" class="btn btn-outline-primary btn-sm">Save</button> 
+                {% if next %}
+                <button id="btn-next" type="submit" name="next" class="btn btn-outline-primary btn-sm">
+                    Save and Next</button> 
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+</div>
+
+{% endblock %}

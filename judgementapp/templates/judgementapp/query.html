@@ -1,0 +1,56 @@
+{% extends "judgementapp/base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+<div class="card-body">
+    <h5 class="card-title">Task 1 - Financial Signal Highlighting</h5>
+    <p class="card-text">
+        This task has two subtasks: (task 1a) span highlighting, and (task 1b) content classification.
+        And below are some annotation instructions. 
+    </p>
+</div>
+
+<div class="card text-left m-2">
+    <form class="form-inline" action="" method="post"> {% csrf_token %}
+
+    <div class="card-body row">
+        <div class="col"><h6>{{query.qId}}</h6></div>
+    </div>
+
+    <div class="card-body row">
+        <h6>{{ query.text }} </h6>
+        <div class="col">
+            {% if prev %}
+            <a href="{% url 'query' qId=prev.qId%}" class="btn btn-outline-dark btn-sm">Prev Query</a>
+            {% endif %}
+        </div>
+        <div class="col" align="right">
+            {% if next %}
+            <a href="{% url 'query' qId=next.qId%}" class="btn btn-outline-dark btn-sm">Next Query</a>
+            {% endif %}
+        </div>
+    </div>
+    </form>
+</div>
+
+<div class="card text-left m-2">
+    <div class="table-responsive m-2">
+        <table class="table table-striped">
+            <thead style="table-layout:fixed">
+                <tr><th>Prediction</th><th>Grountruth</th> </tr>
+            </thead>
+            <tbody>
+                {% for judgement in judgements %}
+                <tr><td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'document' qId=query.qId docId=judgement.document.docId %}">{{ judgement.document.docId }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+{% endblock %}
+

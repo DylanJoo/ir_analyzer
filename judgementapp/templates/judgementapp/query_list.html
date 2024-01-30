@@ -1,0 +1,65 @@
+{% extends "judgementapp/base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Queries</h5>
+        <p class="card-text">
+        These are uploaded queries. <br/>
+        The field <span style="color: red">Id is red</span> means <i>highlighting is unfinished</i>.<br/>
+        The field <span style="color: red">#Unjudeged is red</span> means some the <i>relevance judgement</i> is not completely finished.
+        </p>
+        {% if queries %}
+        <a href="{% url 'qlabels' %}" class="btn btn-outline-dark">Download Query Assessments (qlabels) &raquo;</a>
+        <a href="{% url 'qrels' %}" class="btn btn-outline-dark">Download Relevance Assessments (qrels) &raquo;</a>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive m-2">
+        <table class="table table-striped">
+        <thead style="table-layout:fixed">
+            <tr><th style="width: 28%">Id</th>
+                <th style="width: 55%">Text</th>
+                <th style="width: 7%"># Docs</th>
+                <th style="width: 10%"># Unjudged</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for query in queries %}
+            <tr><td><p {% if query.unclassified %} style="color: red" {% endif %}>{{ query.qId }}</p>
+                {% if query.category.0 == 1%}<button type="button" class="btn btn-secondary btn-sm">Trivial</button>
+                {% endif %}
+                {% if query.category.1 == 1%}<button type="button" class="btn btn-primary btn-sm">Company-specific</button>
+                {% endif %}
+                {% if query.category.2 == 1%}<button type="button" class="btn btn-danger btn-sm">Change/Action</button>
+                {% endif %}
+                {% if query.category.3 == 1%}<button type="button" class="btn btn-warning btn-sm">Reason</button>
+                {% endif %}
+                {% if query.category.4 == 1%}<button type="button" class="btn btn-success btn-sm">Redirect</button>
+                {% endif %}
+                </td>
+                <td><a href="{% url 'query' qId=query.qId%}">{{ query.text|truncatechars:256 }}</a>
+                </td>
+                <td>{{ query.num_judgements }}</td>
+                {% if query.category.0 == 1 %} 
+                    <td style="color: lightgray"><u>{{ query.num_unjudged_docs }}</u></td>
+                {% elif query.num_unjudged_docs > 0 %} 
+                    <td style="color: red" >{{ query.num_unjudged_docs }}</td>
+                {% else %} 
+                    <td>{{ query.num_unjudged_docs }}</td>
+                {% endif %}
+                {# <td  #}
+                {#     {% if query.category.0 == 1 %} style="color: gray" #}
+                {#     {% elif query.num_unjudged_docs > 0 %} style="color: red"  #}
+                {#     {% endif %}> #}
+                {#     {{ query.num_unjudged_docs }} #}
+                {# </td> #}
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
