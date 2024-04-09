@@ -29,25 +29,14 @@ class Document(models.Model):
 		return self.docId
 
 	def get_content(self):
-		content = ""
-		try:
-			with open(settings.DATA_DIR+"/"+self.docId) as f:
-			    read = f.read()
-			    try:
-			        metadata = json.loads(read)['metadata']
-			        self.text = "{} {} {} -- #{}".format(
-			                metadata['company_name'],
-			                metadata['form'],
-			                metadata['filing_date'],
-			                metadata['order'],
-			        )
-			        data = json.loads(read)
-			        content = json.loads(read)['contents']
-			    except:
-			        content += read
-		except Exception:
-			content = "Could not read file %s" % settings.DATA_DIR+"/"+self.docId
-		return content
+	    content = ""
+	    with open(settings.DATA_DIR+"/"+self.docId) as f:
+	        read = f.read()
+	        data = json.loads(read)
+	        self.text = data['metadata']['title']
+	        content = data['contents']
+	        self.save()
+	    return content
 
 
 def default_query_categories():
@@ -81,12 +70,22 @@ class Query(models.Model):
 	def judgements(self):
 		return Judgement.objects.filter(query=self.id)
 
-class Prediction(models.Model):
+class PredictionCompare(models.Model):
 
 	query = models.ForeignKey(Query, on_delete=models.CASCADE)
 	document = models.ForeignKey(Document, on_delete=models.CASCADE)
 	comment = models.TextField(default="", null=True)
-	relevance = models.IntegerField()
+	ranking = models.IntegerField(default=0)
+	relevance = models.IntegerField(default=-1)
+
+class PredictionBase(models.Model):
+
+	query = models.ForeignKey(Query, on_delete=models.CASCADE)
+	document = models.ForeignKey(Document, on_delete=models.CASCADE)
+	comment = models.TextField(default="", null=True)
+	ranking = models.IntegerField(default=0)
+	relevance = models.IntegerField(default=-1)
+
 
 class Judgement(models.Model):
 
@@ -95,10 +94,11 @@ class Judgement(models.Model):
 	query = models.ForeignKey(Query, on_delete=models.CASCADE)
 	document = models.ForeignKey(Document, on_delete=models.CASCADE)
 	comment = models.TextField(default="", null=True)
-	relevance = models.IntegerField()
+	relevance = models.IntegerField(default=-1)
 
 	def __str__(self):
 		return '%s Q0 %s %s\n' % (self.query.qId, self.document.docId, self.relevance)
 
 	def label(self):
 		return self.labels[self.relevance]
+

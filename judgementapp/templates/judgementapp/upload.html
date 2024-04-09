@@ -24,12 +24,17 @@
           {% endif %}
           {% if judgements %}
             <div class="alert alert-success" role="alert">
-              {{ judgements }} document results processed succesfully.
+              {{ judgements }} document judgements processed succesfully.
             </div>
           {% endif %}
-          {% if not queries and not judgements %}
+          {% if predictions %}
+            <div class="alert alert-success" role="alert">
+              {{ predictions }} document results processed succesfully.
+            </div>
+          {% endif %}
+          {% if not queries and not judgements and not predictions %}
             <div class="alert alert-warning" role="alert">
-              The queries or results in uploaded files <b>already existed. 
+              The queries or judgements in uploaded files <b>already existed. 
               No</b> any new queries or query-document result will be refreshed.
             </div>
           {% endif %}
@@ -57,19 +62,39 @@
               </div>
           </div>
           </br>
-          <p>Results file with the standard TREC format </p>
+
+          <p>Judgement file</p>
+          <ul>
+              <li><p><b>txt</b> file with trec format -- <b>QueryIdQ 0 DocId Relevance</b></p></li>
+          </ul>
+          <div class="control-group">
+              <div class="container form-label input-group">
+                  <label class="control-label" for="qrelsfile"></label>
+                  <input type="file" class="form-control" id="qrelsfile", name='qrelsFile'/>
+                  <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+              </div>
+          </div>
+          <hr/>
+
+          <p>Two results file with the standard TREC format </p>
           <ul>
               <li><p><b>TREC run</b> file with the format -- <b>QueryId Q0 DocId Rank Score Description</b>.</p></li>
           </ul>
           <div class="control-group">
               <div class="container form-label input-group">
-                  <label class="control-label" for="resultsfile"></label>
-                  <input type="file" class="form-control" id="resultsfile", name='resultsFile'/>
+                  <label class="control-label" for="resultsfile0"></label>
+                  <input type="file" class="form-control" id="resultsfile0", name='resultsFile0'/>
                   <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
               </div>
           </div>
-          </br>
-      </form>
+          <div class="control-group">
+              <div class="container form-label input-group">
+                  <label class="control-label" for="resultsfile1"></label>
+                  <input type="file" class="form-control" id="resultsfile1", name='resultsFile1'/>
+                  <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Upload</button>
+              </div>
+          </div>
+
           <div class="control-group float-end">
               <div class="container form-label input-group">
                   <form class="form-horizontal" action="delete" method="post" enctype="multipart/form-data">
@@ -82,6 +107,7 @@
                   </form>
               </div>
           </div>
+      </form>
     </div>
 
 </div>

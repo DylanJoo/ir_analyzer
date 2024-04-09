@@ -11,3 +11,4 @@ documents_all/
 raw_data/
 /* raw_query/ */
 .DS_Store
+data/
