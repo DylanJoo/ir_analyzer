@@ -34,9 +34,9 @@
         <div class="table-responsive m-2 row">
             <thead style="table-layout:fixed">
                 <tr><th># </th>
-                    <th>Result (base)</th>
+                    <th class="w-50">Result (base)</th>
                     <th>Rel.</th>
-                    <th>Result (compare)</th>
+                    <th class="w-50">Result (compare)</th>
                     <th>Rel</th></tr>
             </thead>
             <tbody>
@@ -44,14 +44,14 @@
                 <tr><td>{{ forloop.counter }}</td>
                     <td>
                         <a href="{% url 'document' qId=query.qId docId=prediction_base.document.docId %}">
-                            <b>{{ prediction_base.document.text }}</b>
+                            <b>{{ prediction_base.document.get_title }}</b>
                         </a>
                         <p>{{ prediction_base.document.get_content }}</p>
                     </td>
                     <td>{{ prediction_base.relevance }}</td>
                     <td>
                         <a href="{% url 'document' qId=query.qId docId=prediction_compare.document.docId %}">
-                            <b>{{ prediction_compare.document.text }}</b>
+                            <b>{{ prediction_compare.document.get_title }}</b>
                         </a>
                         <p>{{ prediction_compare.document.get_content }}</p>
                     </td>

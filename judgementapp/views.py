@@ -269,28 +269,29 @@ def upload(request):
         f = request.FILES[result_id]
         qryCount, docCount, prdCount = 0, 0, 0
 
-        for result in f:
+        for result in tqdm(f):
             qid, z, docid, rank, score, desc = result.decode().strip().split()
 
-            query = Query.objects.get(qId=qid)
-            document, _ = Document.objects.get_or_create(docId=docid)
-            document.text = "NA"
-            document.save()
+            if int(rank) <= 50:
+                query = Query.objects.get(qId=qid)
+                document, _ = Document.objects.get_or_create(docId=docid)
+                document.text = "NA"
+                document.save()
 
-            # add to predictions
-            prediction, _ = Prediction.objects.get_or_create(query_id=query.id, document_id=document.id)
-            prediction.ranking = int(rank)
+                # add to predictions
+                prediction, _ = Prediction.objects.get_or_create(query_id=query.id, document_id=document.id)
+                prediction.ranking = int(rank)
 
-            # check judgement 
-            judgement, created = Judgement.objects.get_or_create(query_id=query.id, document_id=document.id)
-            if created:
-                judgement.relevance = -1
-                judgement.save()
-            else:
-                prediction.relevance = judgement.relevance
+                # check judgement 
+                judgement, created = Judgement.objects.get_or_create(query_id=query.id, document_id=document.id)
+                if created:
+                    judgement.relevance = -1
+                    judgement.save()
+                else:
+                    prediction.relevance = judgement.relevance
 
-            prediction.save()
-            prdCount += 1
+                prediction.save()
+                prdCount += 1
                 
         context['uploaded'] = True
         context['documents'] = 0

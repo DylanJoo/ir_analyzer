@@ -33,10 +33,15 @@ class Document(models.Model):
 	    with open(settings.DATA_DIR+"/"+self.docId) as f:
 	        read = f.read()
 	        data = json.loads(read)
-	        self.text = data['metadata']['title']
 	        content = data['contents']
-	        self.save()
 	    return content
+
+	def get_title(self):
+	    content = ""
+	    with open(settings.DATA_DIR+"/"+self.docId) as f:
+	        read = f.read()
+	        title = json.loads(read)['metadata']['title']
+	    return title
 
 
 def default_query_categories():
