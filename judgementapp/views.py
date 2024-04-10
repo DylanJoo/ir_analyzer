@@ -199,6 +199,10 @@ def reset(request):
     n = len(queries)
     queries.delete()
 
+    Judgement.objects.all().delete()
+    PredictionBase.objects.all().delete()
+    PredictionCompare.objects.all().delete()
+
     return render(request, 'judgementapp/upload.html', {
         "deleted": False, "amount": n
     })
@@ -275,8 +279,6 @@ def upload(request):
             if int(rank) <= 50:
                 query = Query.objects.get(qId=qid)
                 document, _ = Document.objects.get_or_create(docId=docid)
-                document.text = "NA"
-                document.save()
 
                 # add to predictions
                 prediction, _ = Prediction.objects.get_or_create(query_id=query.id, document_id=document.id)

@@ -8,7 +8,6 @@ db/relevation.db
 documents/
 raw_data/
 .DS_Store
-data/trec-covid/
-data/scidocs/
-data/scifact/
-data/run*
+data/*/run*
+data/*/queries*
+data/*/corpus*
