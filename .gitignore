@@ -8,6 +8,10 @@ db/relevation.db
 documents/
 raw_data/
 .DS_Store
+
+!data/scidocs/qrels.beir-v1.0.0-scidocs.test.txt
+!data/scifact/qrels.beir-v1.0.0-scidocs.test.txt
+
 data/*/run*
 data/*/queries*
 data/*/corpus*

@@ -277,10 +277,14 @@ def upload(request):
         f = request.FILES[result_id]
         qryCount, docCount, prdCount = 0, 0, 0
         results = collections.defaultdict(list)
-        for line in f:
+        for i, line in enumerate(f):
             qid, _, docid, rank, score, desc = line.strip().split()
             if int(rank) <= 100:
                 results[qid.decode("utf-8")].append( (docid.decode("utf-8"), float(score) ))
+
+            # see top 50 queries
+            if len(results) >= 50:
+                break
 
         for qid in tqdm(results):
             query = Query.objects.get(qId=qid)
