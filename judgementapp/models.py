@@ -32,8 +32,7 @@ class Document(models.Model):
 	    content = ""
 	    with open(settings.DATA_DIR+"/"+self.docId) as f:
 	        read = f.read()
-	        data = json.loads(read)
-	        content = data['contents']
+	        content = json.loads(read)['contents']
 	    return content
 
 	def get_title(self):
@@ -73,7 +72,12 @@ class Query(models.Model):
 		return len(self.judgements())
 
 	def judgements(self):
-		return Judgement.objects.filter(query=self.id)
+		return Judgement.objects.filter(query_id=self.id)
+
+class Result(models.Model):
+
+	rId = models.CharField(max_length=50)  
+    
 
 class PredictionCompare(models.Model):
 
@@ -81,7 +85,18 @@ class PredictionCompare(models.Model):
 	document = models.ForeignKey(Document, on_delete=models.CASCADE)
 	comment = models.TextField(default="", null=True)
 	ranking = models.IntegerField(default=0)
+	score = models.FloatField(default=0.0)
 	relevance = models.IntegerField(default=-1)
+
+	def get_score(self):
+		return str(round(self.score, 2))
+
+	@property
+	def name(self):
+		return self.name
+
+	def set_name(self, x):
+		x = self.name
 
 class PredictionBase(models.Model):
 
@@ -89,8 +104,11 @@ class PredictionBase(models.Model):
 	document = models.ForeignKey(Document, on_delete=models.CASCADE)
 	comment = models.TextField(default="", null=True)
 	ranking = models.IntegerField(default=0)
+	score = models.FloatField(default=0.0)
 	relevance = models.IntegerField(default=-1)
 
+	def get_score(self):
+		return str(round(self.score, 2))
 
 class Judgement(models.Model):
 

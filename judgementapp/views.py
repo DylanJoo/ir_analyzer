@@ -195,11 +195,9 @@ def judge(request, qId, docId):
 
 def reset(request):
     # remove queries
-    queries = Query.objects.all()
-    n = len(queries)
-    queries.delete()
-
-    Judgement.objects.all().delete()
+    # queries = Query.objects.all()
+    # n = len(queries)
+    # queries.delete()
     PredictionBase.objects.all().delete()
     PredictionCompare.objects.all().delete()
 
@@ -211,7 +209,10 @@ def delete(request):
     # remove results
     judgements = Judgement.objects.filter(relevance=-1)
     n = len(judgements)
-    judgements.delete()
+    judgements.all().delete()
+
+    PredictionBase.objects.all().delete()
+    PredictionCompare.objects.all().delete()
 
     return render(request, 'judgementapp/upload.html', {
         "deleted": True, "amount": n
@@ -252,9 +253,10 @@ def upload(request):
         for qid in tqdm(qrels):
             query = Query.objects.get(qId=qid)
             for docid, rel in qrels[qid]:
-                document, _ = Document.objects.get_or_create(docId=docid)
-                document.text = "NA"
-                document.save()
+                document, created = Document.objects.get_or_create(docId=docid)
+                if created:
+                    document.text = "NA"
+                    document.save()
                 judgement, _ = Judgement.objects.get_or_create(query_id=query.id, document_id=document.id)
                 judgement.relevance = int(rel)
                 judgement.save()
@@ -270,19 +272,30 @@ def upload(request):
         Prediction = {'resultsFile0': PredictionBase, 
                       'resultsFile1': PredictionCompare}[result_id]
 
+        Prediction.objects.all().delete()
+
         f = request.FILES[result_id]
         qryCount, docCount, prdCount = 0, 0, 0
+        results = collections.defaultdict(list)
+        for line in f:
+            qid, _, docid, rank, score, desc = line.strip().split()
+            if int(rank) <= 100:
+                results[qid.decode("utf-8")].append( (docid.decode("utf-8"), float(score) ))
 
-        for result in tqdm(f):
-            qid, z, docid, rank, score, desc = result.decode().strip().split()
+        for qid in tqdm(results):
+            query = Query.objects.get(qId=qid)
 
-            if int(rank) <= 50:
-                query = Query.objects.get(qId=qid)
-                document, _ = Document.objects.get_or_create(docId=docid)
+            for (docid, score) in results[qid]:
+                document, created = Document.objects.get_or_create(docId=docid)
+                if created:
+                    document.text = "NA"
+                    document.save()
+                else:
+                    docCount += 1
 
                 # add to predictions
                 prediction, _ = Prediction.objects.get_or_create(query_id=query.id, document_id=document.id)
-                prediction.ranking = int(rank)
+                prediction.score = score
 
                 # check judgement 
                 judgement, created = Judgement.objects.get_or_create(query_id=query.id, document_id=document.id)
@@ -296,7 +309,7 @@ def upload(request):
                 prdCount += 1
                 
         context['uploaded'] = True
-        context['documents'] = 0
+        context['documents'] = docCount
         context['predictions'] = prdCount
         context['invalid_queries'] = qryCount
 

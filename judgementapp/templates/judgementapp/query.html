@@ -34,28 +34,28 @@
         <div class="table-responsive m-2 row">
             <thead style="table-layout:fixed">
                 <tr><th># </th>
-                    <th class="w-50">Result (base)</th>
+                    <th class="w-50">Baseline</th>
                     <th>Rel.</th>
-                    <th class="w-50">Result (compare)</th>
-                    <th>Rel</th></tr>
+                    <th class="w-50">Compared</th>
+                    <th>Rel.</th></tr>
             </thead>
             <tbody>
                 {% for prediction_base, prediction_compare in combined %}
                 <tr><td>{{ forloop.counter }}</td>
                     <td>
                         <a href="{% url 'document' qId=query.qId docId=prediction_base.document.docId %}">
-                            <b>{{ prediction_base.document.get_title }}</b>
+                            <b>{{ prediction_base.document.docId }} ({{ prediction_base.get_score }})<br/>{{ prediction_base.document.get_title }}</b>
                         </a>
                         <p>{{ prediction_base.document.get_content }}</p>
                     </td>
-                    <td>{{ prediction_base.relevance }}</td>
+                    <td><p {% if prediction_base.relevance >= 1 %} style="color: red" {% endif %}>{{ prediction_base.relevance }}</p></td>
                     <td>
                         <a href="{% url 'document' qId=query.qId docId=prediction_compare.document.docId %}">
-                            <b>{{ prediction_compare.document.get_title }}</b>
+                            <b>{{ prediction_compare.document.docId }} ({{ prediction_compare.get_score }})<br/>{{ prediction_compare.document.get_title }}</b>
                         </a>
                         <p>{{ prediction_compare.document.get_content }}</p>
                     </td>
-                    <td>{{ prediction_compare.relevance }}</td>
+                    <td><p {% if prediction_compare.relevance >= 1 %} style="color: red" {% endif %}>{{ prediction_compare.relevance }}</p></td>
                 </tr>
                 {% endfor %}
             </tbody>

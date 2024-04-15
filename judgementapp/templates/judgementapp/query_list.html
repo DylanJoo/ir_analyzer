@@ -27,20 +27,8 @@
         </thead>
         <tbody>
             {% for query in queries %}
-            <tr><td><p {% if query.unclassified %} style="color: red" {% endif %}>{{ query.qId }}</p>
-                {% if query.category.0 == 1%}<button type="button" class="btn btn-secondary btn-sm">Trivial</button>
-                {% endif %}
-                {% if query.category.1 == 1%}<button type="button" class="btn btn-primary btn-sm">Company-specific</button>
-                {% endif %}
-                {% if query.category.2 == 1%}<button type="button" class="btn btn-danger btn-sm">Change/Action</button>
-                {% endif %}
-                {% if query.category.3 == 1%}<button type="button" class="btn btn-warning btn-sm">Reason</button>
-                {% endif %}
-                {% if query.category.4 == 1%}<button type="button" class="btn btn-success btn-sm">Redirect</button>
-                {% endif %}
-                </td>
-                <td><a href="{% url 'query' qId=query.qId%}">{{ query.text|truncatechars:256 }}</a>
-                </td>
+            <tr><td><p>{{ query.qId }}</p></td>
+                <td><a href="{% url 'query' qId=query.qId%}">{{ query.text|truncatechars:64 }}</a></td>
                 <td>{{ query.num_judgements }}</td>
                 {% if query.category.0 == 1 %} 
                     <td style="color: lightgray"><u>{{ query.num_unjudged_docs }}</u></td>
